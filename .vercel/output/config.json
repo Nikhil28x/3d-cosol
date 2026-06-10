@@ -29,13 +29,13 @@
 			"continue": false
 		},
 		{
-			"src": "^/?(?:/__data.json)?$",
-			"dest": "/"
-		},
-		{
 			"src": "/.*",
 			"dest": "/![-]/catchall"
 		}
 	],
-	"overrides": {}
+	"overrides": {
+		"index.html": {
+			"path": ""
+		}
+	}
 }
