@@ -4,6 +4,9 @@
   "private": true,
   "description": "Connectivity Solutions Experience Centre, Bangalore — interactive 3D walkthrough of the floor plan",
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -12,6 +15,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.3.1",
+    "@sveltejs/adapter-vercel": "^6.3.3",
     "@sveltejs/kit": "^2.8.1",
     "@sveltejs/vite-plugin-svelte": "^4.0.1",
     "@types/node": "^25.9.2",
