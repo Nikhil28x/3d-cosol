@@ -1,9 +1,3 @@
-let prerendering = false;
-function set_building() {
-}
-function set_prerendering() {
-  prerendering = true;
-}
 let base = "";
 let assets = base;
 const app_dir = "_app";
@@ -25,10 +19,7 @@ export {
   base as b,
   assets as c,
   reset as d,
-  set_building as e,
-  set_prerendering as f,
   override as o,
-  prerendering as p,
   relative as r,
   set_assets as s
 };

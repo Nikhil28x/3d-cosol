@@ -15,6 +15,479 @@
 			]
 		},
 		{
+			"src": "/room/reception",
+			"dest": "/room/reception/"
+		},
+		{
+			"src": "/room/reception/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/reception"
+			}
+		},
+		{
+			"src": "/room/lounge",
+			"dest": "/room/lounge/"
+		},
+		{
+			"src": "/room/lounge/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/lounge"
+			}
+		},
+		{
+			"src": "/room/podcast",
+			"dest": "/room/podcast/"
+		},
+		{
+			"src": "/room/podcast/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/podcast"
+			}
+		},
+		{
+			"src": "/room/demo",
+			"dest": "/room/demo/"
+		},
+		{
+			"src": "/room/demo/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/demo"
+			}
+		},
+		{
+			"src": "/room/conference",
+			"dest": "/room/conference/"
+		},
+		{
+			"src": "/room/conference/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/conference"
+			}
+		},
+		{
+			"src": "/room/digital-lab",
+			"dest": "/room/digital-lab/"
+		},
+		{
+			"src": "/room/digital-lab/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/digital-lab"
+			}
+		},
+		{
+			"src": "/room/server",
+			"dest": "/room/server/"
+		},
+		{
+			"src": "/room/server/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/server"
+			}
+		},
+		{
+			"src": "/room/dock",
+			"dest": "/room/dock/"
+		},
+		{
+			"src": "/room/dock/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/dock"
+			}
+		},
+		{
+			"src": "/room/security",
+			"dest": "/room/security/"
+		},
+		{
+			"src": "/room/security/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/security"
+			}
+		},
+		{
+			"src": "/room/it",
+			"dest": "/room/it/"
+		},
+		{
+			"src": "/room/it/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/it"
+			}
+		},
+		{
+			"src": "/room/tac",
+			"dest": "/room/tac/"
+		},
+		{
+			"src": "/room/tac/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/tac"
+			}
+		},
+		{
+			"src": "/room/exe-cabin-1",
+			"dest": "/room/exe-cabin-1/"
+		},
+		{
+			"src": "/room/exe-cabin-1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/exe-cabin-1"
+			}
+		},
+		{
+			"src": "/room/exe-cabin-2",
+			"dest": "/room/exe-cabin-2/"
+		},
+		{
+			"src": "/room/exe-cabin-2/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/exe-cabin-2"
+			}
+		},
+		{
+			"src": "/room/printer",
+			"dest": "/room/printer/"
+		},
+		{
+			"src": "/room/printer/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/printer"
+			}
+		},
+		{
+			"src": "/room/nap-1",
+			"dest": "/room/nap-1/"
+		},
+		{
+			"src": "/room/nap-1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/nap-1"
+			}
+		},
+		{
+			"src": "/room/nap-2",
+			"dest": "/room/nap-2/"
+		},
+		{
+			"src": "/room/nap-2/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/nap-2"
+			}
+		},
+		{
+			"src": "/room/ups",
+			"dest": "/room/ups/"
+		},
+		{
+			"src": "/room/ups/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/ups"
+			}
+		},
+		{
+			"src": "/room/battery",
+			"dest": "/room/battery/"
+		},
+		{
+			"src": "/room/battery/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/battery"
+			}
+		},
+		{
+			"src": "/room/collab-1",
+			"dest": "/room/collab-1/"
+		},
+		{
+			"src": "/room/collab-1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/collab-1"
+			}
+		},
+		{
+			"src": "/room/phone-top-1",
+			"dest": "/room/phone-top-1/"
+		},
+		{
+			"src": "/room/phone-top-1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/phone-top-1"
+			}
+		},
+		{
+			"src": "/room/phone-top-2",
+			"dest": "/room/phone-top-2/"
+		},
+		{
+			"src": "/room/phone-top-2/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/phone-top-2"
+			}
+		},
+		{
+			"src": "/room/phone-bot-1",
+			"dest": "/room/phone-bot-1/"
+		},
+		{
+			"src": "/room/phone-bot-1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/phone-bot-1"
+			}
+		},
+		{
+			"src": "/room/phone-bot-2",
+			"dest": "/room/phone-bot-2/"
+		},
+		{
+			"src": "/room/phone-bot-2/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/phone-bot-2"
+			}
+		},
+		{
+			"src": "/room/phone-bot-3",
+			"dest": "/room/phone-bot-3/"
+		},
+		{
+			"src": "/room/phone-bot-3/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/phone-bot-3"
+			}
+		},
+		{
+			"src": "/room/mt-4pax",
+			"dest": "/room/mt-4pax/"
+		},
+		{
+			"src": "/room/mt-4pax/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/mt-4pax"
+			}
+		},
+		{
+			"src": "/room/mt-8pax-top",
+			"dest": "/room/mt-8pax-top/"
+		},
+		{
+			"src": "/room/mt-8pax-top/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/mt-8pax-top"
+			}
+		},
+		{
+			"src": "/room/mt-6pax",
+			"dest": "/room/mt-6pax/"
+		},
+		{
+			"src": "/room/mt-6pax/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/mt-6pax"
+			}
+		},
+		{
+			"src": "/room/cabin-e1",
+			"dest": "/room/cabin-e1/"
+		},
+		{
+			"src": "/room/cabin-e1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-e1"
+			}
+		},
+		{
+			"src": "/room/cabin-e2",
+			"dest": "/room/cabin-e2/"
+		},
+		{
+			"src": "/room/cabin-e2/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-e2"
+			}
+		},
+		{
+			"src": "/room/cabin-e3",
+			"dest": "/room/cabin-e3/"
+		},
+		{
+			"src": "/room/cabin-e3/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-e3"
+			}
+		},
+		{
+			"src": "/room/cabin-e4",
+			"dest": "/room/cabin-e4/"
+		},
+		{
+			"src": "/room/cabin-e4/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-e4"
+			}
+		},
+		{
+			"src": "/room/mt-4pax-e",
+			"dest": "/room/mt-4pax-e/"
+		},
+		{
+			"src": "/room/mt-4pax-e/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/mt-4pax-e"
+			}
+		},
+		{
+			"src": "/room/cabin-s1",
+			"dest": "/room/cabin-s1/"
+		},
+		{
+			"src": "/room/cabin-s1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-s1"
+			}
+		},
+		{
+			"src": "/room/cabin-s2",
+			"dest": "/room/cabin-s2/"
+		},
+		{
+			"src": "/room/cabin-s2/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-s2"
+			}
+		},
+		{
+			"src": "/room/mt-8pax-bot",
+			"dest": "/room/mt-8pax-bot/"
+		},
+		{
+			"src": "/room/mt-8pax-bot/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/mt-8pax-bot"
+			}
+		},
+		{
+			"src": "/room/cabin-s3",
+			"dest": "/room/cabin-s3/"
+		},
+		{
+			"src": "/room/cabin-s3/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-s3"
+			}
+		},
+		{
+			"src": "/room/cabin-s4",
+			"dest": "/room/cabin-s4/"
+		},
+		{
+			"src": "/room/cabin-s4/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/cabin-s4"
+			}
+		},
+		{
+			"src": "/room/exe-cabin-s",
+			"dest": "/room/exe-cabin-s/"
+		},
+		{
+			"src": "/room/exe-cabin-s/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/exe-cabin-s"
+			}
+		},
+		{
+			"src": "/room/pantry",
+			"dest": "/room/pantry/"
+		},
+		{
+			"src": "/room/pantry/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/pantry"
+			}
+		},
+		{
+			"src": "/room/mezz-pod-1",
+			"dest": "/room/mezz-pod-1/"
+		},
+		{
+			"src": "/room/mezz-pod-1/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/mezz-pod-1"
+			}
+		},
+		{
+			"src": "/room/mezz-pod-2",
+			"dest": "/room/mezz-pod-2/"
+		},
+		{
+			"src": "/room/mezz-pod-2/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/mezz-pod-2"
+			}
+		},
+		{
+			"src": "/room/store",
+			"dest": "/room/store/"
+		},
+		{
+			"src": "/room/store/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/store"
+			}
+		},
+		{
+			"src": "/room/workfield",
+			"dest": "/room/workfield/"
+		},
+		{
+			"src": "/room/workfield/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/workfield"
+			}
+		},
+		{
 			"src": "/_app/immutable/.+",
 			"headers": {
 				"cache-control": "public, immutable, max-age=31536000"
@@ -36,6 +509,135 @@
 	"overrides": {
 		"index.html": {
 			"path": ""
+		},
+		"room/reception.html": {
+			"path": "room/reception"
+		},
+		"room/lounge.html": {
+			"path": "room/lounge"
+		},
+		"room/podcast.html": {
+			"path": "room/podcast"
+		},
+		"room/demo.html": {
+			"path": "room/demo"
+		},
+		"room/conference.html": {
+			"path": "room/conference"
+		},
+		"room/digital-lab.html": {
+			"path": "room/digital-lab"
+		},
+		"room/server.html": {
+			"path": "room/server"
+		},
+		"room/dock.html": {
+			"path": "room/dock"
+		},
+		"room/security.html": {
+			"path": "room/security"
+		},
+		"room/it.html": {
+			"path": "room/it"
+		},
+		"room/tac.html": {
+			"path": "room/tac"
+		},
+		"room/exe-cabin-1.html": {
+			"path": "room/exe-cabin-1"
+		},
+		"room/exe-cabin-2.html": {
+			"path": "room/exe-cabin-2"
+		},
+		"room/printer.html": {
+			"path": "room/printer"
+		},
+		"room/nap-1.html": {
+			"path": "room/nap-1"
+		},
+		"room/nap-2.html": {
+			"path": "room/nap-2"
+		},
+		"room/ups.html": {
+			"path": "room/ups"
+		},
+		"room/battery.html": {
+			"path": "room/battery"
+		},
+		"room/collab-1.html": {
+			"path": "room/collab-1"
+		},
+		"room/phone-top-1.html": {
+			"path": "room/phone-top-1"
+		},
+		"room/phone-top-2.html": {
+			"path": "room/phone-top-2"
+		},
+		"room/phone-bot-1.html": {
+			"path": "room/phone-bot-1"
+		},
+		"room/phone-bot-2.html": {
+			"path": "room/phone-bot-2"
+		},
+		"room/phone-bot-3.html": {
+			"path": "room/phone-bot-3"
+		},
+		"room/mt-4pax.html": {
+			"path": "room/mt-4pax"
+		},
+		"room/mt-8pax-top.html": {
+			"path": "room/mt-8pax-top"
+		},
+		"room/mt-6pax.html": {
+			"path": "room/mt-6pax"
+		},
+		"room/cabin-e1.html": {
+			"path": "room/cabin-e1"
+		},
+		"room/cabin-e2.html": {
+			"path": "room/cabin-e2"
+		},
+		"room/cabin-e3.html": {
+			"path": "room/cabin-e3"
+		},
+		"room/cabin-e4.html": {
+			"path": "room/cabin-e4"
+		},
+		"room/mt-4pax-e.html": {
+			"path": "room/mt-4pax-e"
+		},
+		"room/cabin-s1.html": {
+			"path": "room/cabin-s1"
+		},
+		"room/cabin-s2.html": {
+			"path": "room/cabin-s2"
+		},
+		"room/mt-8pax-bot.html": {
+			"path": "room/mt-8pax-bot"
+		},
+		"room/cabin-s3.html": {
+			"path": "room/cabin-s3"
+		},
+		"room/cabin-s4.html": {
+			"path": "room/cabin-s4"
+		},
+		"room/exe-cabin-s.html": {
+			"path": "room/exe-cabin-s"
+		},
+		"room/pantry.html": {
+			"path": "room/pantry"
+		},
+		"room/mezz-pod-1.html": {
+			"path": "room/mezz-pod-1"
+		},
+		"room/mezz-pod-2.html": {
+			"path": "room/mezz-pod-2"
+		},
+		"room/store.html": {
+			"path": "room/store"
+		},
+		"room/workfield.html": {
+			"path": "room/workfield"
 		}
 	}
 }

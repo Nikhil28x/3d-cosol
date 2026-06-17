@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { base } from '$app/paths';
 	import Scene from '$lib/components/Scene.svelte';
 	import Minimap from '$lib/components/Minimap.svelte';
 	import type { SceneManager, ViewMode } from '$lib/three/SceneManager';
@@ -140,16 +141,17 @@
 				<div class="grp">
 					<div class="grp-head"><span class="dot" style:background={g.color}></span>{g.name}</div>
 					{#each g.items as r (r.id)}
-						<button
+						<div
 							class="room-item"
 							class:active={selectedId === r.id}
 							onmouseenter={() => (hoveredId = r.id)}
 							onmouseleave={() => (hoveredId = null)}
-							onclick={() => pickRoom(r.id)}
+							role="listitem"
 						>
-							<span class="ri-name">{r.short}</span>
+							<a class="ri-name" href="{base}/room/{r.id}" title={`Open & design ${r.name}`}>{r.short}</a>
 							{#if r.tag}<span class="ri-tag">{r.tag}</span>{/if}
-						</button>
+							<button class="ri-focus" onclick={() => pickRoom(r.id)} title="Preview on map" aria-label="Preview on map">◎</button>
+						</div>
 					{/each}
 				</div>
 			{/each}
@@ -185,6 +187,7 @@
 				{#if selectedRoom.tag}<span>👥 {selectedRoom.tag}</span>{/if}
 			</div>
 			{#if selectedRoom.note}<p>{selectedRoom.note}</p>{/if}
+			<a class="rc-open" href="{base}/room/{selectedRoom.id}">⤢ Open &amp; design this room →</a>
 		</div>
 	{/if}
 
@@ -247,7 +250,7 @@
 		</div>
 	{/if}
 
-	<div class="hint-tip">Click any room · drag to orbit · scroll to zoom</div>
+	<div class="hint-tip">Click a room name to open its 3D designer · ◎ previews on map · drag to orbit</div>
 </main>
 
 <style>
@@ -439,7 +442,17 @@
 		box-shadow: inset 0 0 0 1px rgba(0, 174, 239, 0.45);
 	}
 	.ri-name {
+		flex: 1;
+		min-width: 0;
 		font-weight: 500;
+		color: var(--text);
+		text-decoration: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.ri-name:hover {
+		color: var(--cs-cyan);
 	}
 	.ri-tag {
 		font-size: 10.5px;
@@ -448,6 +461,41 @@
 		padding: 2px 6px;
 		border-radius: 5px;
 		white-space: nowrap;
+		flex: none;
+	}
+	.ri-focus {
+		flex: none;
+		width: 24px;
+		height: 24px;
+		border-radius: 6px;
+		font-size: 12px;
+		color: var(--text-dim);
+		opacity: 0;
+		transition: 0.13s;
+	}
+	.room-item:hover .ri-focus {
+		opacity: 1;
+	}
+	.ri-focus:hover {
+		color: var(--cs-cyan);
+		background: rgba(0, 174, 239, 0.14);
+	}
+	.rc-open {
+		display: block;
+		margin-top: 15px;
+		padding: 10px 12px;
+		border-radius: 9px;
+		text-align: center;
+		font-size: 12.5px;
+		font-weight: 700;
+		text-decoration: none;
+		color: #00141b;
+		background: var(--cs-cyan);
+		transition: 0.15s;
+	}
+	.rc-open:hover {
+		background: #5bc6f0;
+		box-shadow: 0 8px 22px -8px rgba(0, 174, 239, 0.7);
 	}
 
 	/* ---------------- minimap ---------------- */
