@@ -36,7 +36,15 @@ function zoneFloorMat(room: Room): THREE.MeshStandardMaterial {
 	const base = new THREE.Color(room.x < 17.4 && room.zone === 'experience' ? 0xe6e9ec : 0xcdb79c);
 	const zc = new THREE.Color(ZONES[room.zone].color);
 	base.lerp(zc, 0.34);
-	return new THREE.MeshStandardMaterial({ color: base, roughness: 0.9 });
+	// polygonOffset pulls the patch toward the camera in the depth test so it always
+	// wins over the base finished floor a few mm below — no z-fighting at grazing angles.
+	return new THREE.MeshStandardMaterial({
+		color: base,
+		roughness: 0.9,
+		polygonOffset: true,
+		polygonOffsetFactor: -1,
+		polygonOffsetUnits: -1
+	});
 }
 
 function doorSideFor(room: Room): Side {

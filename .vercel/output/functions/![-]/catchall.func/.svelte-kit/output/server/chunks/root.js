@@ -4153,15 +4153,15 @@ function Root($$renderer, $$props) {
 }
 const root = asClassComponent(Root);
 export {
-  attr as a,
-  attr_class as b,
-  ensure_array_like as c,
-  derived as d,
+  ensure_array_like as a,
+  attr as b,
+  attr_class as c,
+  attr_style as d,
   escape_html as e,
-  attr_style as f,
+  stringify as f,
   getContext as g,
-  stringify as h,
-  head as i,
+  head as h,
+  derived as i,
   noop as n,
   root as r,
   safe_not_equal as s

@@ -84,6 +84,21 @@ export const UI_ROOMS: UiRoom[] = ROOMS.filter((r) => r.furniture !== 'empty').m
 	tour: r.tour
 }));
 
+// synthetic entry for the combined arrival hall — shown first in the directory
+UI_ROOMS.unshift({
+	id: 'main-area',
+	name: 'Main Area — Reception & Arrival',
+	short: 'Main Area',
+	zone: 'arrival',
+	zoneName: ZONES.arrival.name,
+	zoneColor: ZONES.arrival.color,
+	tag: 'Arrival',
+	dims: '≈ 22 × 8 m',
+	note: 'The whole arrival hall — reception, brand gallery and waiting lounge — as one designable space.',
+	section: 'experience',
+	tour: false
+});
+
 // synthetic entry for the central open-plan field
 UI_ROOMS.push({
 	id: 'workfield',

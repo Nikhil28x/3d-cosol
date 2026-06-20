@@ -4,11 +4,15 @@
 	import { sceneForRoom, docForRoom } from '$lib/room/layouts';
 	import { CATALOG_LIST, CATEGORIES, catalogLabel } from '$lib/room/catalog';
 	import type { PlacedObject } from '$lib/room/types';
+	import { walkthroughSrc, walkthroughFor } from '$lib/data/walkthroughs';
 
 	let { data }: { data: { id: string } } = $props();
 
 	const def = $derived(sceneForRoom(data.id));
 	const doc = $derived(docForRoom(data.id));
+	const walkUrl = $derived(walkthroughSrc(data.id));
+	const walkMeta = $derived(walkthroughFor(data.id));
+	let showWalk = $state(false);
 
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
@@ -139,7 +143,10 @@
 				e.preventDefault();
 				del();
 			}
-		} else if (e.key === 'Escape') editor?.clearSelection();
+		} else if (e.key === 'Escape') {
+			if (showWalk) showWalk = false;
+			else editor?.clearSelection();
+		}
 		else if (e.key === '1') setMode('translate');
 		else if (e.key === '2') setMode('rotate');
 		else if (e.key === '3') setMode('scale');
@@ -165,18 +172,21 @@
 	{#if !def || !doc}
 		<div class="missing">
 			<h1>Room not found</h1>
-			<a href="{base}/">← Back to the floor plan</a>
+			<a href="{base}/explore">← Back to the floor plan</a>
 		</div>
 	{:else}
 		<!-- ============ TOP BAR ============ -->
 		<header>
-			<a class="back" href="{base}/" aria-label="Back to floor plan">◀ Floor plan</a>
+			<a class="back" href="{base}/explore" aria-label="Back to floor plan">◀ Floor plan</a>
 			<div class="title">
 				<span class="zone" style:background={doc.zoneColor}>{doc.zoneName}</span>
 				<h1>{doc.name}</h1>
 				<p>{doc.tagline}</p>
 			</div>
 			<div class="top-right">
+				{#if walkUrl}
+					<button class="walk-btn" onclick={() => (showWalk = true)}>▶ Walkthrough</button>
+				{/if}
 				<span class="save" class:on={savedFlash} class:dirty>
 					{savedFlash ? '✓ Saved' : dirty ? '• Saving…' : 'Auto-saved'}
 				</span>
@@ -336,6 +346,27 @@
 		</div>
 
 		<div class="hint-tip">Click an object to select · drag the gizmo to move · scroll to zoom · drag empty space to orbit</div>
+
+		<!-- ============ CINEMATIC WALKTHROUGH OVERLAY ============ -->
+		{#if showWalk && walkUrl}
+			<div
+				class="walk-overlay"
+				role="presentation"
+				onclick={() => (showWalk = false)}
+			>
+				<div class="walk-box" role="dialog" aria-label="Cinematic walkthrough" onclick={(e) => e.stopPropagation()}>
+					<div class="walk-head">
+						<span>🎬 Cinematic walkthrough · {doc.name}</span>
+						<button class="x" onclick={() => (showWalk = false)} aria-label="Close walkthrough">✕</button>
+					</div>
+					<!-- svelte-ignore a11y_media_has_caption -->
+					<video class="walk-video" src={walkUrl} controls autoplay loop playsinline></video>
+					{#if walkMeta?.note}
+						<p class="walk-cap">{walkMeta.note}</p>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	{/if}
 </main>
 
@@ -464,6 +495,63 @@
 	.ghost:hover {
 		border-color: var(--cs-cyan);
 		color: var(--cs-cyan);
+	}
+	.walk-btn {
+		padding: 8px 14px;
+		border-radius: 9px;
+		font-size: 12px;
+		font-weight: 700;
+		color: #00141b;
+		background: var(--cs-cyan);
+		border: 1px solid var(--cs-cyan);
+		transition: 0.15s;
+		box-shadow: 0 0 0 0 rgba(0, 174, 239, 0.5);
+	}
+	.walk-btn:hover {
+		filter: brightness(1.1);
+		box-shadow: 0 4px 18px rgba(0, 174, 239, 0.4);
+	}
+
+	/* -------- walkthrough overlay -------- */
+	.walk-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 40;
+		display: grid;
+		place-items: center;
+		padding: 32px;
+		background: rgba(4, 8, 11, 0.78);
+		backdrop-filter: blur(10px);
+	}
+	.walk-box {
+		width: min(1100px, 94vw);
+		background: var(--bg-panel, rgba(14, 20, 26, 0.96));
+		border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.18));
+		border-radius: 14px;
+		overflow: hidden;
+		box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+	}
+	.walk-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 12px 16px;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--text);
+		border-bottom: 1px solid var(--border);
+	}
+	.walk-video {
+		display: block;
+		width: 100%;
+		max-height: 72vh;
+		background: #000;
+	}
+	.walk-cap {
+		margin: 0;
+		padding: 10px 16px 14px;
+		font-size: 11.5px;
+		color: var(--text-dim);
 	}
 
 	/* -------- panels -------- */

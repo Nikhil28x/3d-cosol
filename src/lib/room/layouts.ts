@@ -260,6 +260,31 @@ function specsFor(room: Room | { id: string; furniture: FurnitureKind; w: number
 	}
 }
 
+/* --------------------------------------------- main arrival area (synthetic) */
+/* Combines the Reception & Brand Gallery with the Reception Lounge into one
+   designable "main area" hall — reception cluster on the left, waiting lounge
+   on the right, with an open entry walkway between them. */
+const MAIN_AREA = { w: 22.4, d: 7.6 };
+function mainAreaSpecs(w: number, d: number): Spec[] {
+	const out: Spec[] = [];
+	// Reception & brand gallery — left ~half of the hall
+	const recW = w * 0.5;
+	const recOff = -w * 0.25;
+	for (const s of specsFor({ id: 'reception', furniture: 'reception', w: recW, d })) {
+		out.push({ ...s, x: s.x + recOff });
+	}
+	// Waiting lounge — right ~40% of the hall
+	const lonW = w * 0.4;
+	const lonOff = w * 0.3;
+	for (const s of specsFor({ id: 'lounge', furniture: 'lounge', w: lonW, d })) {
+		out.push({ ...s, x: s.x + lonOff });
+	}
+	// greeting totems flanking the central entrance walkway
+	out.push({ kind: 'istandee', x: -w * 0.02, z: d * 0.3, rot: 0.2 });
+	out.push({ kind: 'istandee', x: w * 0.06, z: d * 0.3, rot: -0.2 });
+	return out;
+}
+
 /* ---------------------------------------------------- workfield (synthetic) */
 function workfieldSpecs(): Spec[] {
 	const out: Spec[] = [];
@@ -310,6 +335,21 @@ function finalize(id: string, specs: Spec[]): PlacedObject[] {
 }
 
 export function sceneForRoom(id: string): RoomScene | null {
+	if (id === 'main-area') {
+		const { w, d } = MAIN_AREA;
+		return {
+			id,
+			name: 'Main Area — Reception & Arrival',
+			zone: 'arrival',
+			w,
+			d,
+			wallH: 3.2,
+			partition: 'glass',
+			floorColor: '#e6e9ec',
+			accent: 'cool',
+			objects: finalize(id, mainAreaSpecs(w, d))
+		};
+	}
 	if (id === 'workfield') {
 		return {
 			id,
@@ -670,6 +710,31 @@ const WORKFIELD_DOC: KindDoc = {
 };
 
 export function docForRoom(id: string): RoomDoc | null {
+	if (id === 'main-area') {
+		const z = ZONES.arrival;
+		const r = CONTENT.reception!;
+		const l = CONTENT.lounge!;
+		const uniq = (a: string[]) => [...new Set(a)];
+		return {
+			id,
+			name: 'Main Area — Reception & Arrival',
+			zone: 'arrival',
+			zoneName: z.name,
+			zoneColor: z.color,
+			section: 'experience',
+			tagline: 'The whole arrival hall — reception, brand gallery and waiting lounge as one space.',
+			summary:
+				'The complete main arrival area read as a single designable room: the curved welcome desk and circular PD-T brand counter flow past the brand video wall into the hospitality waiting lounge beside the mezzanine stair — the first impression for every visitor.',
+			area: 'Arrival zone',
+			dims: '≈ 22 × 8 m',
+			capacity: undefined,
+			characteristics: r.characteristics,
+			offers: uniq([...r.offers, ...l.offers]),
+			devices: uniq([...r.devices, ...l.devices]),
+			palette: r.palette,
+			materials: uniq([...r.materials, ...l.materials])
+		};
+	}
 	if (id === 'workfield') {
 		const z = ZONES.work;
 		return {
@@ -718,6 +783,7 @@ export function docForRoom(id: string): RoomDoc | null {
 
 /* All room ids that have a designable page (every plan room + the open field). */
 export const ROOM_IDS: string[] = [
+	'main-area',
 	...ROOMS.filter((r) => r.furniture !== 'empty').map((r) => r.id),
 	'workfield'
 ];

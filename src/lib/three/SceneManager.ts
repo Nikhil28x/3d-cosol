@@ -36,6 +36,11 @@ export class SceneManager {
 	private highlightBox: THREE.LineSegments;
 	private raf = 0;
 	private disposed = false;
+	private needsRender = true;
+	private invalidate = () => {
+		this.needsRender = true;
+	};
+	private tmpDir = new THREE.Vector3();
 
 	rooms: RoomMeta[];
 	onHover: (id: string | null) => void = () => {};
@@ -51,6 +56,10 @@ export class SceneManager {
 		this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 		this.renderer.shadowMap.enabled = true;
 		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		// the scene is static (fixed sun, no moving geometry) — bake the shadow map
+		// once instead of re-rendering the 2048² depth pass every single frame.
+		this.renderer.shadowMap.autoUpdate = false;
+		this.renderer.shadowMap.needsUpdate = true;
 		this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		this.renderer.toneMappingExposure = 1.05;
 		this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -59,7 +68,9 @@ export class SceneManager {
 		this.scene.background = new THREE.Color(0x0c151c);
 		this.scene.fog = new THREE.Fog(0x0c151c, 120, 360);
 
-		this.camera = new THREE.PerspectiveCamera(55, 1, 0.1, 600);
+		// near plane raised from 0.1 (a 0.1:600 ratio destroys depth precision and
+		// makes the floor tear); 0.5 is still well under walk eye height + minDistance.
+		this.camera = new THREE.PerspectiveCamera(55, 1, 0.5, 400);
 
 		// lights
 		this.scene.add(new THREE.HemisphereLight(0xeaf6ff, 0x202a30, 1.05));
@@ -112,6 +123,7 @@ export class SceneManager {
 		this.orbit.minDistance = 4;
 		this.orbit.maxDistance = 110;
 		this.orbit.target.set(SHELL.width / 2, 1, SHELL.depth / 2);
+		this.orbit.addEventListener('change', this.invalidate);
 
 		this.walk = new PointerLockControls(this.camera, this.renderer.domElement);
 		this.walk.addEventListener('lock', () => this.onLockChange(true));
@@ -177,6 +189,7 @@ export class SceneManager {
 				this.highlightBox.visible = false;
 			}
 			this.canvas.style.cursor = id ? 'pointer' : 'default';
+			this.invalidate();
 		}
 	}
 
@@ -187,6 +200,7 @@ export class SceneManager {
 		this.highlightBox.visible = false;
 		this.hoveredId = null;
 		this.onHover(null);
+		this.invalidate();
 		if (mode === 'walk') {
 			this.orbit.enabled = false;
 			// drop the camera to eye height near the reception
@@ -214,6 +228,7 @@ export class SceneManager {
 		this.tween.t = 0;
 		this.tween.dur = dur;
 		this.tween.active = true;
+		this.invalidate();
 	}
 
 	focusOverview(instant = false) {
@@ -224,6 +239,7 @@ export class SceneManager {
 		if (instant) {
 			this.camera.position.copy(pos);
 			this.orbit.target.copy(tgt);
+			this.invalidate();
 		} else if (this.mode === 'orbit') {
 			this.startTween(pos, tgt, 1.2);
 		}
@@ -238,6 +254,7 @@ export class SceneManager {
 			const dirX = Math.sign(cx - room.cx) || 1;
 			this.camera.position.set(room.cx - dirX * (room.w / 2 + 1.5), EYE, room.cz + room.d / 2 + 1.5);
 			this.camera.lookAt(room.cx, EYE, room.cz);
+			this.invalidate();
 			return;
 		}
 		const dist = Math.max(room.w, room.d) * 1.15 + 7.5;
@@ -252,6 +269,7 @@ export class SceneManager {
 
 	toggleLabels(visible: boolean) {
 		this.build.labelGroup.visible = visible;
+		this.invalidate();
 	}
 
 	/* -------------------------------------------------------------- loop --- */
@@ -267,10 +285,15 @@ export class SceneManager {
 			this.camera.position.lerpVectors(this.tween.fromPos, this.tween.toPos, e);
 			this.orbit.target.lerpVectors(this.tween.fromTarget, this.tween.toTarget, e);
 			if (k >= 1) this.tween.active = false;
+			this.needsRender = true;
 		}
 
+		let walking = false;
 		if (this.mode === 'walk' && this.walk.isLocked) {
 			const speed = (this.keys['ShiftLeft'] || this.keys['ShiftRight'] ? 7 : 3.4) * dt;
+			const moved =
+				this.keys['KeyW'] || this.keys['ArrowUp'] || this.keys['KeyS'] || this.keys['ArrowDown'] ||
+				this.keys['KeyA'] || this.keys['ArrowLeft'] || this.keys['KeyD'] || this.keys['ArrowRight'];
 			if (this.keys['KeyW'] || this.keys['ArrowUp']) this.walk.moveForward(speed);
 			if (this.keys['KeyS'] || this.keys['ArrowDown']) this.walk.moveForward(-speed);
 			if (this.keys['KeyA'] || this.keys['ArrowLeft']) this.walk.moveRight(-speed);
@@ -280,20 +303,28 @@ export class SceneManager {
 			this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, b.minX, b.maxX);
 			this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, b.minZ, b.maxZ);
 			this.camera.position.y = EYE;
+			// mouse-look (pointer lock) moves the camera without our knowledge, so in
+			// walk mode keep rendering every frame while the pointer is locked.
+			walking = true;
 		}
 
-		if (this.mode === 'orbit') this.orbit.update();
+		// OrbitControls must update every frame for damping; it returns true while
+		// the camera is still easing after a drag/zoom.
+		const damping = this.mode === 'orbit' ? this.orbit.update() : false;
 
-		// publish camera position to the minimap (~12fps)
-		this.camTick += dt;
-		if (this.camTick > 0.08) {
-			this.camTick = 0;
-			const dir = new THREE.Vector3();
-			this.camera.getWorldDirection(dir);
-			this.onCamera(this.camera.position.x, this.camera.position.z, Math.atan2(dir.x, dir.z));
+		const shouldRender = this.needsRender || damping || this.tween.active || walking;
+		if (shouldRender) {
+			this.renderer.render(this.scene, this.camera);
+			this.needsRender = false;
+
+			// publish camera position to the minimap (~12fps), only when it can change
+			this.camTick += dt;
+			if (this.camTick > 0.08) {
+				this.camTick = 0;
+				this.camera.getWorldDirection(this.tmpDir);
+				this.onCamera(this.camera.position.x, this.camera.position.z, Math.atan2(this.tmpDir.x, this.tmpDir.z));
+			}
 		}
-
-		this.renderer.render(this.scene, this.camera);
 	};
 
 	/* ------------------------------------------------------------ resize -- */
@@ -303,6 +334,7 @@ export class SceneManager {
 		this.renderer.setSize(w, h, false);
 		this.camera.aspect = w / h;
 		this.camera.updateProjectionMatrix();
+		this.needsRender = true;
 	};
 
 	dispose() {
@@ -312,11 +344,22 @@ export class SceneManager {
 		this.canvas.removeEventListener('click', this.handleClick);
 		window.removeEventListener('keydown', this.handleKey);
 		window.removeEventListener('keyup', this.handleKey);
+		this.orbit.removeEventListener('change', this.invalidate);
 		this.orbit.dispose();
-		this.renderer.dispose();
 		this.scene.traverse((o) => {
 			const mesh = o as THREE.Mesh;
 			if (mesh.geometry) mesh.geometry.dispose();
 		});
+		// per-instance label sprites carry CanvasTextures — dispose them explicitly
+		this.build.labelGroup.traverse((o) => {
+			const mat = (o as THREE.Sprite).material as THREE.SpriteMaterial | undefined;
+			if (mat) {
+				mat.map?.dispose();
+				mat.dispose();
+			}
+		});
+		this.highlightBox.geometry.dispose();
+		(this.highlightBox.material as THREE.Material).dispose();
+		this.renderer.dispose();
 	}
 }

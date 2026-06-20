@@ -15,6 +15,39 @@
 			]
 		},
 		{
+			"src": "/explore",
+			"dest": "/explore/"
+		},
+		{
+			"src": "/explore/",
+			"status": 308,
+			"headers": {
+				"Location": "/explore"
+			}
+		},
+		{
+			"src": "/reel",
+			"dest": "/reel/"
+		},
+		{
+			"src": "/reel/",
+			"status": 308,
+			"headers": {
+				"Location": "/reel"
+			}
+		},
+		{
+			"src": "/room/main-area",
+			"dest": "/room/main-area/"
+		},
+		{
+			"src": "/room/main-area/",
+			"status": 308,
+			"headers": {
+				"Location": "/room/main-area"
+			}
+		},
+		{
 			"src": "/room/reception",
 			"dest": "/room/reception/"
 		},
@@ -509,6 +542,15 @@
 	"overrides": {
 		"index.html": {
 			"path": ""
+		},
+		"explore.html": {
+			"path": "explore"
+		},
+		"reel.html": {
+			"path": "reel"
+		},
+		"room/main-area.html": {
+			"path": "room/main-area"
 		},
 		"room/reception.html": {
 			"path": "room/reception"

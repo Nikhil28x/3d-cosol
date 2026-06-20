@@ -29,6 +29,11 @@
 	};
 
 	const camAngle = $derived(90 - (cam.rot * 180) / Math.PI);
+
+	// the combined "Main Area" room covers the reception + lounge footprints
+	const COVERS: Record<string, string[]> = { 'main-area': ['reception', 'lounge'] };
+	const isSel = (id: string) => selected === id || (selected ? COVERS[selected]?.includes(id) : false);
+	const isHov = (id: string) => hovered === id || (hovered ? COVERS[hovered]?.includes(id) : false);
 </script>
 
 <svg viewBox={`-0.6 -0.6 ${W + 1.2} ${D + 1.2}`} class="map" role="img" aria-label="Floor plan minimap">
@@ -76,9 +81,9 @@
 				width={r.w}
 				height={r.d}
 				fill={ZONES[r.zone].color}
-				fill-opacity={selected === r.id ? 0.95 : hovered === r.id ? 0.8 : 0.62}
-				stroke={selected === r.id || hovered === r.id ? '#00aeef' : 'rgba(0,0,0,.3)'}
-				stroke-width={selected === r.id || hovered === r.id ? 0.35 : 0.08}
+				fill-opacity={isSel(r.id) ? 0.95 : isHov(r.id) ? 0.8 : 0.62}
+				stroke={isSel(r.id) || isHov(r.id) ? '#00aeef' : 'rgba(0,0,0,.3)'}
+				stroke-width={isSel(r.id) || isHov(r.id) ? 0.35 : 0.08}
 			/>
 		</g>
 	{/each}

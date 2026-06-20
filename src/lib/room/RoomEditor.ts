@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { MAT } from '../three/materials';
-import { buildObject } from './catalog';
+import { buildObject, CATALOG } from './catalog';
 import type { PlacedObject, RoomScene } from './types';
 
 export type GizmoMode = 'translate' | 'rotate' | 'scale';
@@ -11,6 +11,8 @@ interface Tracked {
 	id: string;
 	kind: string;
 	group: THREE.Group;
+	/** base footprint [w, d] in metres, used for wall-aware clamping */
+	footprint: [number, number];
 }
 
 let idCounter = 0;
@@ -31,7 +33,6 @@ export class RoomEditor {
 	private camera: THREE.PerspectiveCamera;
 	private orbit: OrbitControls;
 	private gizmo: TransformControls;
-	private clock = new THREE.Clock();
 	private raycaster = new THREE.Raycaster();
 	private pointer = new THREE.Vector2();
 	private raf = 0;
@@ -43,11 +44,20 @@ export class RoomEditor {
 	private selectionBox: THREE.BoxHelper;
 	private hoverBox: THREE.BoxHelper;
 	private grid: THREE.GridHelper;
+	/** per-instance materials this editor created (NOT the shared MAT.* library) —
+	    disposed on teardown so repeated room→room navigation doesn't leak GPU memory */
+	private owned: THREE.Material[] = [];
 
 	private selectedId: string | null = null;
 	private hoveredId: string | null = null;
-	private margin = 0.35;
+	private wallGap = 0.12;
 	private downPos = new THREE.Vector2();
+	private pointerDown = false;
+	private needsRender = true;
+	/** request a single frame to be drawn (render-on-demand to avoid idle GPU churn) */
+	private invalidate = () => {
+		this.needsRender = true;
+	};
 
 	onSelect: (obj: PlacedObject | null) => void = () => {};
 	onChange: (objects: PlacedObject[]) => void = () => {};
@@ -68,7 +78,9 @@ export class RoomEditor {
 		this.scene.background = new THREE.Color(0x0b1218);
 		this.scene.fog = new THREE.Fog(0x0b1218, 40, 120);
 
-		this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
+		// near plane lifted well off 0.1 — a 0.1:400 ratio wrecks depth precision
+		// near y=0 and is what makes coplanar floor surfaces z-fight ("break").
+		this.camera = new THREE.PerspectiveCamera(50, 1, 0.3, 200);
 
 		this.buildLights();
 		this.buildShell();
@@ -79,6 +91,7 @@ export class RoomEditor {
 		this.grid.position.y = 0.012;
 		this.grid.visible = false;
 		this.scene.add(this.grid);
+		this.owned.push(this.grid.material as THREE.Material);
 
 		this.scene.add(this.objectsGroup);
 
@@ -87,11 +100,13 @@ export class RoomEditor {
 		(this.selectionBox.material as THREE.LineBasicMaterial).depthTest = false;
 		this.selectionBox.visible = false;
 		this.scene.add(this.selectionBox);
+		this.owned.push(this.selectionBox.material as THREE.Material);
 		this.hoverBox = new THREE.BoxHelper(new THREE.Object3D(), 0x7fd4ff);
 		(this.hoverBox.material as THREE.LineBasicMaterial).transparent = true;
 		(this.hoverBox.material as THREE.LineBasicMaterial).opacity = 0.6;
 		this.hoverBox.visible = false;
 		this.scene.add(this.hoverBox);
+		this.owned.push(this.hoverBox.material as THREE.Material);
 
 		// controls
 		this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
@@ -101,11 +116,13 @@ export class RoomEditor {
 		this.orbit.minDistance = 2;
 		this.orbit.maxDistance = Math.max(room.w, room.d) * 2.4 + 12;
 		this.orbit.target.set(0, 1, 0);
+		this.orbit.addEventListener('change', this.invalidate);
 
 		this.gizmo = new TransformControls(this.camera, this.renderer.domElement);
 		this.gizmo.setTranslationSnap(null);
 		this.gizmo.setRotationSnap(THREE.MathUtils.degToRad(15));
 		this.gizmo.showY = false; // floor-plane translation only by default
+		this.gizmo.addEventListener('change', this.invalidate);
 		this.gizmo.addEventListener('dragging-changed', (e) => {
 			this.orbit.enabled = !e.value;
 			if (!e.value) this.commitSelected();
@@ -123,13 +140,17 @@ export class RoomEditor {
 	/* --------------------------------------------------------- scene build -- */
 	private buildLights() {
 		const warm = this.room.accent === 'warm';
-		this.scene.add(new THREE.HemisphereLight(0xeaf6ff, 0x2a343c, 1.2));
-		this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+		// Base fill from hemisphere + ambient (cheap, no per-fragment falloff). A
+		// single shadow-casting sun and one accent point light keep the fragment
+		// shading cost low — heavy multi-point-light setups are what make the
+		// editor stutter while dragging on weaker GPUs.
+		this.scene.add(new THREE.HemisphereLight(0xeaf6ff, 0x2a343c, 1.35));
+		this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
 		const sun = new THREE.DirectionalLight(warm ? 0xfff0d8 : 0xffffff, 1.5);
 		sun.position.set(this.room.w * 0.4, 14, this.room.d * 0.5 + 6);
 		sun.castShadow = true;
-		sun.shadow.mapSize.set(2048, 2048);
+		sun.shadow.mapSize.set(1024, 1024);
 		sun.shadow.camera.near = 1;
 		sun.shadow.camera.far = 60;
 		const s = Math.max(this.room.w, this.room.d) * 0.8 + 4;
@@ -140,33 +161,27 @@ export class RoomEditor {
 		sun.shadow.bias = -0.0004;
 		this.scene.add(sun);
 
-		const accent = new THREE.PointLight(warm ? 0xffd9a8 : 0xbfe6ff, 0.9, 32, 2);
+		const accent = new THREE.PointLight(warm ? 0xffd9a8 : 0xbfe6ff, 1.0, 36, 2);
 		accent.position.set(0, this.room.wallH - 0.3, 0);
 		this.scene.add(accent);
-		const fill = new THREE.PointLight(warm ? 0xffe8c8 : 0xd6f0ff, 0.55, 28, 2);
-		fill.position.set(-this.room.w * 0.3, this.room.wallH - 0.5, this.room.d * 0.3);
-		this.scene.add(fill);
-		const fill2 = new THREE.PointLight(0xffffff, 0.4, 28, 2);
-		fill2.position.set(this.room.w * 0.3, this.room.wallH - 0.5, -this.room.d * 0.2);
-		this.scene.add(fill2);
 	}
 
 	private buildShell() {
 		const { w, d, wallH, partition } = this.room;
 
 		// soft infinite ground that catches shadow
-		const ground = new THREE.Mesh(
-			new THREE.PlaneGeometry(400, 400),
-			new THREE.MeshStandardMaterial({ color: 0x0e161d, roughness: 1 })
-		);
+		const groundMat = new THREE.MeshStandardMaterial({ color: 0x0e161d, roughness: 1 });
+		const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), groundMat);
 		ground.rotation.x = -Math.PI / 2;
 		ground.position.y = -0.4;
 		ground.receiveShadow = true;
 		this.scene.add(ground);
+		this.owned.push(groundMat);
 
-		// plinth
+		// plinth — top sits BELOW the finished floor top (was coplanar at y=0, which
+		// z-fought across the whole floor). Plinth spans -0.45..-0.05; floor -0.06..0.
 		const plinth = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 0.4, d + 0.6), MAT.plinth);
-		plinth.position.set(0, -0.2, 0);
+		plinth.position.set(0, -0.25, 0);
 		plinth.receiveShadow = true;
 		this.scene.add(plinth);
 
@@ -176,6 +191,7 @@ export class RoomEditor {
 		floor.position.set(0, -0.03, 0);
 		floor.receiveShadow = true;
 		this.scene.add(floor);
+		this.owned.push(floorMat);
 
 		// walls: N(-z), E(+x), W(-x) per partition; S(+z, camera side) always glazed
 		const wallMat = partition === 'solid' ? MAT.wallWhite : MAT.glass;
@@ -234,8 +250,12 @@ export class RoomEditor {
 			(o as THREE.Mesh).userData.objId = id;
 		});
 		this.objectsGroup.add(built);
-		const tr: Tracked = { id, kind: p.kind, group: built };
+		const footprint = (CATALOG[p.kind]?.footprint ?? [1, 1]) as [number, number];
+		const tr: Tracked = { id, kind: p.kind, group: built, footprint };
 		this.tracked.set(id, tr);
+		// keep loaded/saved objects inside the (possibly different-sized) room
+		this.clampToBounds(tr);
+		this.invalidate();
 		return tr;
 	}
 
@@ -298,6 +318,7 @@ export class RoomEditor {
 		this.selectedId = null;
 		this.onSelect(null);
 		this.emitChange();
+		this.invalidate();
 	}
 
 	/* ----------------------------------------------------------- selection -- */
@@ -314,12 +335,14 @@ export class RoomEditor {
 		this.selectionBox.visible = true;
 		this.hoverBox.visible = false;
 		this.onSelect(this.toPlaced(tr));
+		this.invalidate();
 	}
 
 	private detach() {
 		this.selectedId = null;
 		this.gizmo.detach();
 		this.selectionBox.visible = false;
+		this.invalidate();
 	}
 
 	clearSelection() {
@@ -330,6 +353,7 @@ export class RoomEditor {
 	setMode(mode: GizmoMode) {
 		this.gizmo.setMode(mode);
 		this.gizmo.showY = mode === 'scale' ? true : false;
+		this.invalidate();
 	}
 
 	/** set uniform scale on the selected object from the inspector slider */
@@ -353,22 +377,40 @@ export class RoomEditor {
 
 	/* -------------------------------------------------------- constraints --- */
 	private clampX(x: number) {
-		const lim = this.room.w / 2 - this.margin;
+		const lim = Math.max(0, this.room.w / 2 - this.wallGap - 0.3);
 		return THREE.MathUtils.clamp(x, -lim, lim);
 	}
 	private clampZ(z: number) {
-		const lim = this.room.d / 2 - this.margin;
+		const lim = Math.max(0, this.room.d / 2 - this.wallGap - 0.3);
 		return THREE.MathUtils.clamp(z, -lim, lim);
+	}
+	/** Clamp an object so its rotated, scaled footprint stays within the walls —
+	    this is what stops furniture clipping through walls or sliding out of the
+	    room when you drag, rotate or scale it. */
+	private clampToBounds(tr: Tracked) {
+		const sc = Math.abs(tr.group.scale.x) || 1;
+		const rot = tr.group.rotation.y;
+		const c = Math.abs(Math.cos(rot));
+		const s = Math.abs(Math.sin(rot));
+		const [fw, fd] = tr.footprint;
+		// half-extents of the axis-aligned box bounding the rotated footprint
+		const halfX = ((fw * c + fd * s) / 2) * sc;
+		const halfZ = ((fw * s + fd * c) / 2) * sc;
+		const limX = Math.max(0, this.room.w / 2 - this.wallGap - halfX);
+		const limZ = Math.max(0, this.room.d / 2 - this.wallGap - halfZ);
+		tr.group.position.x = THREE.MathUtils.clamp(tr.group.position.x, -limX, limX);
+		tr.group.position.z = THREE.MathUtils.clamp(tr.group.position.z, -limZ, limZ);
+		tr.group.position.y = 0;
 	}
 	private constrainSelected() {
 		if (!this.selectedId) return;
 		const tr = this.tracked.get(this.selectedId);
 		if (!tr) return;
-		tr.group.position.x = this.clampX(tr.group.position.x);
-		tr.group.position.z = this.clampZ(tr.group.position.z);
-		tr.group.position.y = 0;
-		tr.group.scale.x = tr.group.scale.z = tr.group.scale.y = THREE.MathUtils.clamp(tr.group.scale.x, 0.4, 2.5);
+		const sc = THREE.MathUtils.clamp(tr.group.scale.x, 0.4, 2.5);
+		tr.group.scale.setScalar(sc);
+		this.clampToBounds(tr);
 		this.selectionBox.setFromObject(tr.group);
+		this.invalidate();
 	}
 	private commitSelected() {
 		this.constrainSelected();
@@ -415,6 +457,7 @@ export class RoomEditor {
 	toggleGrid(on: boolean) {
 		this.grid.visible = on;
 		this.gizmo.setTranslationSnap(on ? 0.25 : null);
+		this.invalidate();
 	}
 
 	/* ------------------------------------------------------------- camera --- */
@@ -428,6 +471,7 @@ export class RoomEditor {
 			this.camera.position.copy(pos);
 		}
 		this.camera.lookAt(0, 1, 0);
+		this.invalidate();
 	}
 
 	focusSelected() {
@@ -464,7 +508,9 @@ export class RoomEditor {
 	}
 
 	private onPointerMove = (e: PointerEvent) => {
-		if (this.gizmo.dragging) return;
+		// skip hover raycasts while dragging the gizmo or orbiting the camera —
+		// raycasting every move during a drag is a needless per-frame cost
+		if (this.gizmo.dragging || this.pointerDown) return;
 		this.setPointer(e);
 		const id = this.pickObjectId();
 		if (id !== this.hoveredId) {
@@ -480,14 +526,17 @@ export class RoomEditor {
 				this.hoverBox.visible = false;
 			}
 			this.canvas.style.cursor = id ? 'pointer' : 'default';
+			this.invalidate();
 		}
 	};
 
 	private onPointerDown = (e: PointerEvent) => {
+		this.pointerDown = true;
 		this.downPos.set(e.clientX, e.clientY);
 	};
 
 	private onPointerUp = (e: PointerEvent) => {
+		this.pointerDown = false;
 		if (this.gizmo.dragging || this.gizmo.axis) return;
 		// ignore drags (orbit) — only treat as a click if pointer barely moved
 		if (this.downPos.distanceTo(new THREE.Vector2(e.clientX, e.clientY)) > 5) return;
@@ -501,13 +550,15 @@ export class RoomEditor {
 	private loop = () => {
 		if (this.disposed) return;
 		this.raf = requestAnimationFrame(this.loop);
-		this.clock.getDelta();
-		this.orbit.update();
-		if (this.selectionBox.visible && this.selectedId) {
-			const tr = this.tracked.get(this.selectedId);
-			if (tr) this.selectionBox.setFromObject(tr.group);
+		// orbit.update() returns true while damping is still settling
+		const moving = this.orbit.update();
+		// Render only when something actually changed (input, damping, an active
+		// gizmo drag, or an explicit invalidate). Idle frames are skipped, which
+		// keeps the GPU cool and avoids the long-session slowdown/stutter.
+		if (this.needsRender || moving || this.gizmo.dragging) {
+			this.renderer.render(this.scene, this.camera);
+			this.needsRender = false;
 		}
-		this.renderer.render(this.scene, this.camera);
 	};
 
 	resize = () => {
@@ -516,6 +567,7 @@ export class RoomEditor {
 		this.renderer.setSize(w, h, false);
 		this.camera.aspect = w / h;
 		this.camera.updateProjectionMatrix();
+		this.invalidate();
 	};
 
 	dispose() {
@@ -528,10 +580,13 @@ export class RoomEditor {
 		this.gizmo.dispose();
 		this.orbit.dispose();
 		this.clearObjects();
-		this.renderer.dispose();
 		this.scene.traverse((o) => {
 			const m = o as THREE.Mesh;
 			if (m.geometry) m.geometry.dispose();
 		});
+		// dispose only the per-instance materials we created (never the shared MAT.*)
+		for (const mat of this.owned) mat.dispose();
+		this.owned = [];
+		this.renderer.dispose();
 	}
 }
