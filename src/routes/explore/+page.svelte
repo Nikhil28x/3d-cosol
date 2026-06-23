@@ -125,6 +125,7 @@
 		</nav>
 
 		<div class="head-right">
+			<a class="devices-link" href="{base}/devices">▤ Devices</a>
 			<a class="walk-link" href="{base}/reel">▶ Walkthrough</a>
 			<button class="ghost" onclick={() => (showAbout = true)}>About / Design</button>
 			<span class="rev">Rev 03</span>
@@ -373,6 +374,22 @@
 	.walk-link:hover {
 		filter: brightness(1.1);
 		box-shadow: 0 4px 16px rgba(0, 174, 239, 0.4);
+	}
+	.devices-link {
+		padding: 8px 14px;
+		border: 1px solid var(--border-strong);
+		border-radius: 9px;
+		font-size: 12.5px;
+		font-weight: 600;
+		color: var(--text);
+		background: rgba(20, 30, 38, 0.6);
+		backdrop-filter: blur(8px);
+		text-decoration: none;
+		transition: 0.16s;
+	}
+	.devices-link:hover {
+		border-color: var(--cs-cyan);
+		color: var(--cs-cyan);
 	}
 	.rev {
 		font-size: 11px;

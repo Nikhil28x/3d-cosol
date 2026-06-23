@@ -15,6 +15,17 @@
 			]
 		},
 		{
+			"src": "/devices",
+			"dest": "/devices/"
+		},
+		{
+			"src": "/devices/",
+			"status": 308,
+			"headers": {
+				"Location": "/devices"
+			}
+		},
+		{
 			"src": "/explore",
 			"dest": "/explore/"
 		},
@@ -542,6 +553,9 @@
 	"overrides": {
 		"index.html": {
 			"path": ""
+		},
+		"devices.html": {
+			"path": "devices"
 		},
 		"explore.html": {
 			"path": "explore"

@@ -98,6 +98,7 @@
 			<p>Jump into any space, or explore the full interactive floor plan.</p>
 			<div class="outro-links">
 				<a class="btn primary" href="{base}/explore">Interactive floor plan →</a>
+				<a class="btn" href="{base}/devices">Device stack</a>
 				{#each stops as s (s.id)}
 					<a class="btn" href="{base}/room/{s.id}">{s.name}</a>
 				{/each}
