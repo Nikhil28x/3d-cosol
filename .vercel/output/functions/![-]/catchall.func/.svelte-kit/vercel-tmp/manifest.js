@@ -7,10 +7,10 @@ function __memo(fn) {
 return {
 	appDir: "_app",
 	appPath: "_app",
-	assets: new Set([".DS_Store","favicon.svg","walkthrough/conference.mp4","walkthrough/demo.mp4","walkthrough/digital-lab.mp4","walkthrough/podcast.mp4","walkthrough/reception.mp4","walkthrough/security.mp4"]),
+	assets: new Set(["favicon.svg","walkthrough/conference.mp4","walkthrough/demo.mp4","walkthrough/digital-lab.mp4","walkthrough/podcast.mp4","walkthrough/reception.mp4","walkthrough/security.mp4"]),
 	mimeTypes: {".svg":"image/svg+xml",".mp4":"video/mp4"},
 	_: {
-		client: {start:"_app/immutable/entry/start.CQPsOjXs.js",app:"_app/immutable/entry/app.ApyWqlFb.js",imports:["_app/immutable/entry/start.CQPsOjXs.js","_app/immutable/chunks/Dccizqd-.js","_app/immutable/chunks/QQ9aj7Ru.js","_app/immutable/chunks/Cm5qQfVW.js","_app/immutable/chunks/kV0bmuRl.js","_app/immutable/chunks/-UyI9lYi.js","_app/immutable/entry/app.ApyWqlFb.js","_app/immutable/chunks/QQ9aj7Ru.js","_app/immutable/chunks/f9qv1XTx.js","_app/immutable/chunks/CENLX1kc.js","_app/immutable/chunks/kV0bmuRl.js","_app/immutable/chunks/BjGZJLqS.js","_app/immutable/chunks/C3GP_Uj8.js","_app/immutable/chunks/BRjCmpFr.js","_app/immutable/chunks/gozRUBdp.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
+		client: {start:"_app/immutable/entry/start.C1aiStAH.js",app:"_app/immutable/entry/app.CxFgmY29.js",imports:["_app/immutable/entry/start.C1aiStAH.js","_app/immutable/chunks/C-sctB2i.js","_app/immutable/chunks/DTvbbu-R.js","_app/immutable/chunks/B6eCqMKj.js","_app/immutable/chunks/-UyI9lYi.js","_app/immutable/entry/app.CxFgmY29.js","_app/immutable/chunks/C-sctB2i.js","_app/immutable/chunks/C4QfuizF.js","_app/immutable/chunks/Cmc5WvyW.js","_app/immutable/chunks/B6eCqMKj.js","_app/immutable/chunks/CPs5nWyq.js","_app/immutable/chunks/DA3CHA85.js","_app/immutable/chunks/BwPUCxts.js","_app/immutable/chunks/BerbfmMn.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
 		nodes: [
 			__memo(() => import('../output/server/nodes/0.js')),
 			__memo(() => import('../output/server/nodes/1.js'))

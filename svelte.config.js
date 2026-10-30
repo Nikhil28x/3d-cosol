@@ -5,9 +5,8 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		// pin the Vercel serverless runtime so the build doesn't depend on the
-		// build machine's Node version (Vercel was running Node 24)
-		adapter: adapter({ runtime: 'nodejs20.x' })
+		// Pin the Vercel serverless runtime to the project's supported Node line.
+		adapter: adapter({ runtime: 'nodejs24.x' })
 	}
 };
 

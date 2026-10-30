@@ -7,34 +7,13 @@ function set_read_implementation(fn) {
 }
 function set_manifest(_) {
 }
-function set_env(env) {
-}
 let public_env = {};
 function set_private_env(environment) {
 }
 function set_public_env(environment) {
   public_env = environment;
 }
-const options = {
-  app_template_contains_nonce: false,
-  async: false,
-  csp: { "mode": "auto", "directives": { "upgrade-insecure-requests": false, "block-all-mixed-content": false }, "reportOnly": { "upgrade-insecure-requests": false, "block-all-mixed-content": false } },
-  csrf_check_origin: true,
-  csrf_trusted_origins: [],
-  embedded: false,
-  env_public_prefix: "PUBLIC_",
-  env_private_prefix: "",
-  hash_routing: false,
-  hooks: null,
-  // added lazily, via `get_hooks`
-  preload_strategy: "modulepreload",
-  root,
-  service_worker: false,
-  service_worker_options: void 0,
-  server_error_boundaries: false,
-  templates: {
-    app: ({ head, body, assets, nonce, env }) => '<!doctype html>\n<html lang="en">\n	<head>\n		<meta charset="utf-8" />\n		<link rel="icon" href="' + assets + '/favicon.svg" />\n		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />\n		<meta name="theme-color" content="#00aeef" />\n		<meta name="description" content="Connectivity Solutions Experience Centre, Bangalore — interactive 3D floor-plan walkthrough" />\n		<title>CoSol Experience Centre · 3D Walkthrough</title>\n		' + head + '\n	</head>\n	<body data-sveltekit-preload-data="hover">\n		<div style="display: contents">' + body + "</div>\n	</body>\n</html>\n",
-    error: ({ status, message }) => '<!doctype html>\n<html lang="en">\n	<head>\n		<meta charset="utf-8" />\n		<title>' + message + `</title>
+const error = ({ status, message }) => '<!doctype html>\n<html lang="en">\n	<head>\n		<meta charset="utf-8" />\n		<title>' + message + `</title>
 
 		<style>
 			body {
@@ -103,9 +82,29 @@ const options = {
 	</head>
 	<body>
 		<div class="error">
-			<span class="status">` + status + '</span>\n			<div class="message">\n				<h1>' + message + "</h1>\n			</div>\n		</div>\n	</body>\n</html>\n"
+			<span class="status">` + status + '</span>\n			<div class="message">\n				<h1>' + message + "</h1>\n			</div>\n		</div>\n	</body>\n</html>\n";
+const options = {
+  app_template_contains_nonce: false,
+  async: false,
+  csp: { "mode": "auto", "directives": { "upgrade-insecure-requests": false, "block-all-mixed-content": false }, "reportOnly": { "upgrade-insecure-requests": false, "block-all-mixed-content": false } },
+  csrf_check_origin: true,
+  csrf_trusted_origins: [],
+  embedded: false,
+  env_public_prefix: "PUBLIC_",
+  env_private_prefix: "",
+  hash_routing: false,
+  hooks: null,
+  // added lazily, via `get_hooks`
+  preload_strategy: "modulepreload",
+  root,
+  service_worker: false,
+  service_worker_options: void 0,
+  server_error_boundaries: false,
+  templates: {
+    app: ({ head, body, assets, nonce, env }) => '<!doctype html>\n<html lang="en">\n	<head>\n		<meta charset="utf-8" />\n		<link rel="icon" href="' + assets + '/favicon.svg" />\n		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />\n		<meta name="theme-color" content="#00aeef" />\n		<meta name="description" content="Connectivity Solutions Experience Centre, Bangalore — interactive 3D floor-plan walkthrough" />\n		<title>CoSol Experience Centre · 3D Walkthrough</title>\n		' + head + '\n	</head>\n	<body data-sveltekit-preload-data="hover">\n		<div style="display: contents">' + body + "</div>\n	</body>\n</html>\n",
+    error
   },
-  version_hash: "17z35v5"
+  version_hash: "14hb9iw"
 };
 async function get_hooks() {
   let handle;
@@ -128,8 +127,7 @@ async function get_hooks() {
 export {
   set_public_env as a,
   set_read_implementation as b,
-  set_env as c,
-  set_manifest as d,
+  set_manifest as c,
   get_hooks as g,
   options as o,
   public_env as p,
